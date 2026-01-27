@@ -9,11 +9,30 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const { search, department, page = 1, limit = 10 } = req.query;
+    /*
+    What this guarantees:
+
+   1.String(page) → never crashes
+
+   2.parseInt(..., 10) → safe integer parsing
+
+   3.|| 1 → fallback if result is NaN
+
+   4.Math.max(1, ...) → never below 1
+
+  💡 Result is ALWAYS a valid positive integer
+*/
     const currentPage = Math.max(1, parseInt(String(page), 10) || 1);
+
+    // Minimum = 1
+    // Default = 10
+    // Maximum = 100
+    // 🛡️ Protection against abuse & mistakes
     const limitPerPage = Math.min(
       Math.max(1, parseInt(String(limit), 10) || 10),
       100
     );
+
     const offset = (currentPage - 1) * limitPerPage;
     const filterConditions = [];
 
@@ -28,6 +47,9 @@ router.get("/", async (req, res) => {
     }
     // If department filter exists ,match department name
     if (department) {
+      // In SQL:
+      // % = wildcard (any text)
+      // _ = wildcard (single character)
       const deptPattern = `%${String(department).replace(/[%_]/g, `\\$&`)}%`;
       filterConditions.push(ilike(departments.name, deptPattern));
     }

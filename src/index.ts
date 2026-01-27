@@ -3,7 +3,9 @@ import subjectrouter from "./routes/subject.js";
 import cors from "cors";
 const app = express();
 if (!process.env.FRONTEND_URL)
-  throw new Error("Frontend Url is not set in .env file");
+  throw new Error(
+    "Frontend Url is not configured in .env file .Please set the Frontend Url in your .env file"
+  );
 
 app.use(
   cors({
